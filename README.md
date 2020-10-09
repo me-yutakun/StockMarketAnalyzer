@@ -1,5 +1,5 @@
 # StockMarketTrends
-To get stock pricing trends of various companies altogether, plot, analyse and predict them intaking real-time data from Yahoo finance using python3
+To get stock pricing trends of various companies altogether; plot, analyse and predict them after intaking real-time data from Yahoo finance using python3
 ## Objective
 To plot data visually and get final answer as which stocks are worth buying or not, bearing high/low risks, also predict their future estimate altogether [its probabilistic though :)]
 ## Pre-Requisites

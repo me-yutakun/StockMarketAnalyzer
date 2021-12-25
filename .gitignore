@@ -1,3 +1,4 @@
 desktop.ini
-README.md
 .ipynb_checkpoints/*
+.idea
+warehouse

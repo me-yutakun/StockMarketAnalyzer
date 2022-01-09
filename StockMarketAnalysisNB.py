@@ -12,63 +12,72 @@ import mplfinance as mf
 from tqdm import tqdm
 import requests
 import datetime as dt
+import os
 warnings.simplefilter("ignore")
 
-def DateFormatter(d):
-    return dt.datetime.strptime(d,"%YYYY%mm%dd")
+if __name__=="__main__":
+    main()
+
+def to_date(rawstr,fmt='%Y%m%d'):
+    return dt.datetime.strptime(rawstr,fmt)
+
+def date_format(rawdate,fmt='%d-%m-%Y'):
+    return dt.datetime.strftime(rawdate,fmt)
 #Ignore it while working on the existing file
 #Take input for ticker, start and end date.
-ticker=['TCS.NS','MSFT']
-start='01-01-2020'
-end='30-06-2020'
-fname=str('_'.join(ticker)+'_'+start+'_'+end+'.csv')
-idf=pdr.get_data_yahoo(ticker,start,end)
-# idf.to_csv(fname)
-pdr.get_data_yahoo()
-# PREPROCESSING DATA
 
-# In[13]:
+def preprocessing(df,ticker):
+    df.reset_index(inplace=True)
+    if len(ticker)!=1:
+        df = df.drop(index=[0, 1, 2])
+    else:
+        df = df.drop(index=[0, 1])
+    df = df.rename(columns={'Attributes': 'Date'})
+    df.set_index('Date', inplace=True)
+    df.index = pd.to_datetime(df.index)
+    return  df
 
-
-df=pd.read_csv(fname,parse_dates=True,index_col=0)
-df.reset_index(inplace=True)
-if len(ticker)!=1:
-    df=df.drop(index=[0,1,2])
-else:
-    df=df.drop(index=[0,1])
-df=df.rename(columns={'Attributes':'Date'})
-df.set_index('Date',inplace=True)
-df.index=pd.to_datetime(df.index)
-
-
-# In[14]:
-
-
-def nanfinder():
+def nanfinder(df):
     lna=[]
     for i in df.columns:
         if df[i].isna().sum():
             lna.append(i)
     count=len(lna) #No of cols that have NaN
     return (lna,count)
-nanfinder()
 
+def nanhandler(df):
+    lna, count=nanfinder()[0], nanfinder()[1]
+    imputer = SimpleImputer(missing_values = np.nan,strategy ='median')
+    for i in range(count):
+        imputer=imputer.fit(df[[lna[i]]])
+        df[lna[i]]=imputer.transform(df[[lna[i]]])
 
-# In[15]:
+def source(ticker,handler,startdate,enddate):
+    fname = str(
+        '_'.join(ticker) + '_' + date_format(to_date(startdate), '%d-%m-%Y') + '_' + date_format(to_date(enddate),
+                                                                                                 '%d-%m-%Y') + '.csv')
+    file = pdr.DataReader(ticker,handler, to_date(startdate), to_date(enddate))
+    #pdr.get_data_yahoo()
+    if (os.path.exists(fname)):
+        os.remove(fname)
+        file.to_csv(fname)
+    else:
+        file.to_csv(fname)
+    idf = pd.read_csv(fname, parse_dates=True, index_col=0)
 
-
-lna, count=nanfinder()[0], nanfinder()[1]
-imputer = SimpleImputer(missing_values = np.nan,strategy ='median')
-for i in range(count):
-    imputer=imputer.fit(df[[lna[i]]])
-    df[lna[i]]=imputer.transform(df[[lna[i]]])
-nanfinder()
+def main():
+    #ticker=[x for x in input("Please insert space separated tickers:").split(" ")]
+    #start=input("Insert startdate (in yyyyMMdd format):")
+    #end=input("Insert enddate (in yyyyMMdd format):")
+    ticker = ['TCS.NS', 'MSFT']
+    start='20200101'
+    end='20200630'
+    source(ticker,'yahoo',start,end)
+    df=preprocessing(idf,ticker)
+    nanhandler(df)
 
 
 # WORKING ON THE FINISHED DATA
-
-# In[16]:
-
 
 ## SMA
 for t in tqdm(range(len(ticker))):

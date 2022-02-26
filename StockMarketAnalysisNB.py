@@ -15,18 +15,13 @@ import datetime as dt
 import os
 warnings.simplefilter("ignore")
 
-if __name__=="__main__":
-    main()
-
 def to_date(rawstr,fmt='%Y%m%d'):
     return dt.datetime.strptime(rawstr,fmt)
 
 def date_format(rawdate,fmt='%d-%m-%Y'):
     return dt.datetime.strftime(rawdate,fmt)
-#Ignore it while working on the existing file
-#Take input for ticker, start and end date.
 
-def preprocessing(df,ticker):
+def preprocessing(df, ticker):
     df.reset_index(inplace=True)
     if len(ticker)!=1:
         df = df.drop(index=[0, 1, 2])
@@ -46,41 +41,29 @@ def nanfinder(df):
     return (lna,count)
 
 def nanhandler(df):
-    lna, count=nanfinder()[0], nanfinder()[1]
+    lna, count=nanfinder(df)[0], nanfinder(df)[1]
     imputer = SimpleImputer(missing_values = np.nan,strategy ='median')
     for i in range(count):
         imputer=imputer.fit(df[[lna[i]]])
         df[lna[i]]=imputer.transform(df[[lna[i]]])
 
-def source(ticker,handler,startdate,enddate):
-    fname = str(
-        '_'.join(ticker) + '_' + date_format(to_date(startdate), '%d-%m-%Y') + '_' + date_format(to_date(enddate),
-                                                                                                 '%d-%m-%Y') + '.csv')
-    file = pdr.DataReader(ticker,handler, to_date(startdate), to_date(enddate))
-    #pdr.get_data_yahoo()
+def source(ticker,startdate,enddate,handler='yahoo'):
+    fname = str('_'.join(ticker) + '_' + date_format(to_date(startdate), '%d-%m-%Y') + '_' + date_format(to_date(enddate),'%d-%m-%Y') + '.csv')
     if (os.path.exists(fname)):
-        os.remove(fname)
-        file.to_csv(fname)
+        #pdr.get_data_yahoo()
+        print("File {} for tickers {} already exists! Skipping the download.".format(fname,",".join(str(x) for x in ticker)))
     else:
+        file = pdr.DataReader(ticker, handler, to_date(startdate), to_date(enddate))
         file.to_csv(fname)
-    idf = pd.read_csv(fname, parse_dates=True, index_col=0)
-
-def main():
-    #ticker=[x for x in input("Please insert space separated tickers:").split(" ")]
-    #start=input("Insert startdate (in yyyyMMdd format):")
-    #end=input("Insert enddate (in yyyyMMdd format):")
-    ticker = ['TCS.NS', 'MSFT']
-    start='20200101'
-    end='20200630'
-    source(ticker,'yahoo',start,end)
-    df=preprocessing(idf,ticker)
-    nanhandler(df)
-
+        print("File {} is downloaded successfully!".format(fname))
+        print("File for tickers {} is now available locally!".format(",".join(str(x) for x in ticker)))
+    df = pd.read_csv(fname, parse_dates=True, index_col=0)
+    return df
 
 # WORKING ON THE FINISHED DATA
 
 ## SMA
-for t in tqdm(range(len(ticker))):
+"""for t in tqdm(range(len(ticker))):
     if t != 0:
         _t = str(t)
         _adj = str('Adj Close' + "." + _t)
@@ -253,17 +236,4 @@ risk = {}
 for i in range(len(stds)):
     risk[stds[i][0]]=i
 print(risk)
-
-
-# In[20]:
-
-
-## Scraping
-r=requests.get("https://www.fpi.nsdl.co.in/web/Reports/Latest.aspx")
-
-
-# In[23]:
-
-
-
-
+"""

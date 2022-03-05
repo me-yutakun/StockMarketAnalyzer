@@ -6,16 +6,14 @@ To plot data visually and get final answer as which stocks are worth buying or n
 ## Pre-Requisites
 Py3 setup on PC with PATH specified in env variables.
 
-###### Dependencies [as on 9-10-2020]
+## Dependencies*
 Please refer requirements.txt to check it. Post that use pip install -r requirements.txt to install the same in virtualenv.
 
-## List of methods used [as on 9-10-2020]
-1. SMA
-2. CBT
-3. OHLC
-4. STD
+## Technicals*
+SMA, CBT, OHLC, STD
 
 ## Future proposals
 Decision tree classifier
 ###### Version [pre-production] v1.0-beta
 ###### Next: v1.0
+###### *as on 9-10-2020

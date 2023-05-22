@@ -3,6 +3,6 @@ mplfinance==0.12.7a0
 numpy==1.21.0
 pandas==1.0.4
 pandas_datareader==0.10.0
-requests==2.23.0
+requests==2.31.0
 scikit_learn==1.0.2
 tqdm==4.50.0
